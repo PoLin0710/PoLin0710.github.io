@@ -1,114 +1,220 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>我們之間的漏格書</title>
+  <meta charset="UTF-8">
+  <title>幽靈錢包：鏈上遺產追蹤</title>
   <style>
+    * { box-sizing: border-box; }
+
     body {
-      font-family: "Courier New", monospace;
-      text-align: center;
-      padding: 30px;
-      background-color: #f5f5f5;
-    }
-
-    textarea {
-      width: 80%;
-      height: 120px;
-      font-size: 18px;
-      font-family: "Courier New", monospace;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-    }
-
-    button {
-      margin-top: 15px;
-      padding: 10px 30px;
-      font-size: 16px;
-      background-color: #222;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #444;
-    }
-
-    #output {
-      margin-top: 40px; /* 與按鈕距離加大 */
-      font-size: 20px; /* 字變小 */
-      word-break: break-word;
-      max-width: 90%;
-      margin-left: auto;
-      margin-right: auto;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 2px;
-    }
-
-    .masked, .visible {
-      width: 1.2em;
-      height: 1.5em;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-family: "Courier New", monospace;
-      font-size: 20px;
-      border-radius: 4px;
-    }
-
-    .masked {
       background-color: #000;
-      color: #000;
-      border: 1px solid #333;
+      color: #00ff88;
+      font-family: "Courier New", monospace;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
     }
 
-    .masked:hover {
-      background-color: #111;
+    .container {
+      display: flex;
+      flex-direction: row;
+      margin-top: 5vh;
+      gap: 3rem;
+      max-width: 1200px;
+      width: 100%;
+      padding: 2rem;
     }
 
-    .visible {
+    .terminal-box {
+      background-color: #000;
+      padding: 2rem;
+      border: 1px solid #00ff88;
+      width: 100%;
+      max-width: 800px;
+      height: 500px;
+      overflow: hidden;
+      box-shadow: 0 0 12px #00ff88;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: 6px;
+      transition: height 0.5s ease;
+    }
+
+    .terminal-box.expanded {
+      height: 600px;
+    }
+
+    .terminal {
+      white-space: pre-wrap;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      flex-grow: 1;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      animation: blink 1s step-start infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .button {
+      background: none;
+      color: #00ff88;
+      border: 1px solid #00ff88;
+      padding: 0.75rem 1.5rem;
+      margin: 0rem 0.65rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+      display: none;
+    }
+
+    .button:hover {
+      background: #00ff88;
       color: #000;
-      background-color: #eee;
-      border: 1px solid #aaa;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .sidebar {
+      flex-shrink: 0;
+      width: 320px;
+      color: #00ff88;
+      font-size: 1.1rem;
+      padding: 1rem;
+      border: 2px solid #00ff88;
+      box-shadow: 0 0 8px #00ff88 inset;
+      border-radius: 6px;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .sidebar h2 {
+      margin-top: 0;
+      text-align: center;
+      font-size: 1.5rem;
+      text-decoration: underline;
+    }
+
+    .sidebar ul {
+      padding-left: 1rem;
+    }
+
+    .sidebar li {
+      margin: 1.2rem 0;
+    }
+
+    .ascii-art {
+      font-size: 0.85rem;
+      white-space: pre;
+      line-height: 1.1;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <h2>我們之間的漏格書</h2>
 
-  <textarea id="inputText" placeholder="請輸入代碼 0x0a..."></textarea><br>
+  <div class="container">
+    <!-- 左側終端機 -->
+    <div id="terminalBox" class="terminal-box">
+      <div id="terminal" class="terminal">
+        <span id="typing-line"></span><span class="cursor">|</span>
+      </div>
+      <div class="button-group">
+        <button id="enterBtn" class="button" onclick="location.href='https://ethernaut.openzeppelin.com/level/17';">
+          進入 Recovery 工廠
+        </button>
+        <button id="extraBtn" class="button" onclick="window.open('https://polin0710.github.io/tool.html', '_blank')">
+          :-<@#?:/^!}[
+        </button>
+      </div>
+    </div>
 
-  <button onclick="showMaskedCode()">顯示</button>
-
-  <div id="output"></div>
+    <!-- 右側任務區 -->
+    <div class="sidebar">
+      <div>
+        <h2>任務目標</h2>
+        <ul>
+          <li>1️⃣ 生成 Recovery 工廠地址</li>
+          <li>2️⃣ 找出遺失的合約 Bytecode</li>
+          <li>3️⃣ 透過特殊的工具獲取暗號</li>
+        </ul>
+      </div>
+      <div class="ascii-art">
+⠀⠀⠄⠀⠀⠂⠀⠀⠀⡀⠀⠀
+⠁⠀⠀⣠⣶⣿⣷⣶⣄⠀⠀⠁
+⠈⠀⢰⡿⠛⢿⡿⠻⣿⡆⠀⡀
+⠀⠠⣾⡇⠀⢸⡇⠀⢸⣧⠀⠀
+⠀⠀⣿⣷⣤⣿⣷⣤⣿⣿⠀⠀
+⠠⠀⣿⣿⣿⣿⣿⣿⣿⣿⠀⡀
+⠄⡀⠙⠟⢿⣿⡿⠿⠿⠋⠀⠀
+      </div>
+    </div>
+  </div>
 
   <script>
-    function showMaskedCode() {
-      const text = document.getElementById('inputText').value;
-      const output = document.getElementById('output');
-      output.innerHTML = '';
+    const lines = [
+      ">>> 接收到匿名訊息...",
+      ">>> 『在鏈上，有個傳說中的「幽靈錢包」，裡頭藏著一筆上古遺產。』",
+      ">>> 『那筆資產藏在某個無人知曉的幽靈地址中，",
+      "      並透過一個叫作 Recovery 的工廠合約部署出去。』",
+      "\n>>> 你是一名區塊鏈分析師兼白帽駭客。",
+      ">>> 你需要透過網站找出生成的工廠地址",
+      ">>> 並透過該地址完成追蹤，找出最後遺產的所在地址",
+      "",
+      ">>> 利用合約代碼獲取關鍵片段...",
+      "",
+      "\n\n     就讓我看看你的實力吧                                ---獵鑰人"
+    ];
 
-      // ✅ 自訂顯示的字元位置（從 0 開始）
-      const showPositions = [108, 553, 976, 1678];
+    const terminalBox = document.getElementById('terminalBox');
+    const terminal = document.getElementById('terminal');
+    const typingLine = document.getElementById('typing-line');
+    const enterBtn = document.getElementById('enterBtn');
+    const extraBtn = document.getElementById('extraBtn');
+    let lineIndex = 0;
+    let charIndex = 0;
 
-      const chars = text.split('');
-      for (let i = 0; i < chars.length; i++) {
-        const span = document.createElement('span');
-        if (showPositions.includes(i)) {
-          span.className = 'visible';
-          span.textContent = chars[i];
+    function typeNextChar() {
+      if (lineIndex < lines.length) {
+        const line = lines[lineIndex];
+        if (charIndex < line.length) {
+          typingLine.textContent += line.charAt(charIndex);
+          charIndex++;
+          setTimeout(typeNextChar, 30);
         } else {
-          span.className = 'masked';
-          span.textContent = '█';
+          const br = document.createElement('div');
+          br.textContent = typingLine.textContent;
+          terminal.insertBefore(br, typingLine);
+          typingLine.textContent = '';
+          charIndex = 0;
+          lineIndex++;
+          setTimeout(typeNextChar, 300);
         }
-        output.appendChild(span);
+      } else {
+        document.querySelector('.cursor').remove();
+        enterBtn.style.display = 'inline-block';
+        extraBtn.style.display = 'inline-block';
+        terminalBox.classList.add('expanded');
       }
     }
+
+    typeNextChar();
   </script>
 </body>
 </html>

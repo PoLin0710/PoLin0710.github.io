@@ -136,11 +136,14 @@
         <span id="typing-line"></span><span class="cursor">|</span>
       </div>
       <div class="button-group">
-        <button id="enterBtn" class="button" onclick="location.href='https://ethernaut.openzeppelin.com/level/17';">
+        <button id="enterBtn" class="button" onclick="window.open('https://ethernaut.openzeppelin.com/level/17', '_blank');">
           進入 Recovery 工廠
         </button>
         <button id="extraBtn" class="button" onclick="window.open('https://polin0710.github.io/tool.html', '_blank')">
           :-<@#?:/^!}[
+        </button>
+        <button id="toolBtn" class="button" onclick="window.open('https://sepolia.etherscan.io/', '_blank')">
+          我想這是你需要的
         </button>
       </div>
     </div>
@@ -153,6 +156,12 @@
           <li>1️⃣ 生成 Recovery 工廠地址</li>
           <li>2️⃣ 找出遺失的合約 Bytecode</li>
           <li>3️⃣ 透過特殊的工具獲取暗號</li>
+        </ul>
+        <h2>小提示🤫</h2>
+        <ul>
+          <li>進入工廠請務必進行驗證身份</li>
+          <li>使用工具時請保持低調</li>
+          <li>所有資訊皆公開於鏈上</li>
         </ul>
       </div>
       <div class="ascii-art">
@@ -187,6 +196,7 @@
     const typingLine = document.getElementById('typing-line');
     const enterBtn = document.getElementById('enterBtn');
     const extraBtn = document.getElementById('extraBtn');
+    const toolBtn = document.getElementById('toolBtn');
     let lineIndex = 0;
     let charIndex = 0;
 
@@ -210,6 +220,7 @@
         document.querySelector('.cursor').remove();
         enterBtn.style.display = 'inline-block';
         extraBtn.style.display = 'inline-block';
+        toolBtn.style.display = 'inline-block';
         terminalBox.classList.add('expanded');
       }
     }

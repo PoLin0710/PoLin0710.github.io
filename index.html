@@ -1,231 +1,1109 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <title>幽靈錢包：鏈上遺產追蹤</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>資料庫期末考名詞解釋互動網頁</title>
   <style>
+    :root {
+      --bg: #f8fafd;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --line: #d8e1ef;
+      --danger: #dc2626;
+      --shadow: 0 14px 38px rgba(31, 41, 55, .08);
+      --radius: 20px;
+    }
     * { box-sizing: border-box; }
-
+    html { scroll-behavior: smooth; }
     body {
-      background-color: #000;
-      color: #00ff88;
-      font-family: "Courier New", monospace;
       margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, .13), transparent 32rem),
+        radial-gradient(circle at bottom right, rgba(14, 165, 233, .12), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
       min-height: 100vh;
     }
-
-    .container {
-      display: flex;
-      flex-direction: row;
-      margin-top: 5vh;
-      gap: 3rem;
-      max-width: 1200px;
-      width: 100%;
-      padding: 2rem;
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 28px 20px;
+      border-right: 1px solid var(--line);
+      background: rgba(255,255,255,.76);
+      backdrop-filter: blur(14px);
+      overflow: auto;
     }
-
-    .terminal-box {
-      background-color: #000;
-      padding: 2rem;
-      border: 1px solid #00ff88;
-      width: 100%;
-      max-width: 800px;
-      height: 500px;
+    aside h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+    aside p {
+      margin: 0 0 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    nav a {
+      text-decoration: none;
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+    }
+    nav a:hover {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+    main {
+      padding: 44px clamp(20px, 5vw, 72px) 80px;
+    }
+    .hero {
+      background: linear-gradient(135deg, #ffffff 0%, #eef6ff 100%);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: clamp(26px, 5vw, 48px);
+      margin-bottom: 30px;
+      position: relative;
       overflow: hidden;
-      box-shadow: 0 0 12px #00ff88;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      right: -80px;
+      top: -70px;
+      border-radius: 50%;
+      background: rgba(37, 99, 235, .12);
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(30px, 5vw, 52px);
+      line-height: 1.15;
+      letter-spacing: -0.04em;
+    }
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+      font-size: 17px;
+    }
+    .toolbar {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      border-radius: 6px;
-      transition: height 0.5s ease;
-    }
-
-    .terminal-box.expanded {
-      height: 600px;
-    }
-
-    .terminal {
-      white-space: pre-wrap;
-      font-size: 1.1rem;
-      line-height: 1.6;
-      flex-grow: 1;
-    }
-
-    .cursor {
-      display: inline-block;
-      width: 10px;
-      animation: blink 1s step-start infinite;
-    }
-
-    @keyframes blink {
-      50% { opacity: 0; }
-    }
-
-    .button {
-      background: none;
-      color: #00ff88;
-      border: 1px solid #00ff88;
-      padding: 0.75rem 1.5rem;
-      margin: 0rem 0.65rem;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s;
-      display: none;
-    }
-
-    .button:hover {
-      background: #00ff88;
-      color: #000;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 1rem;
+      gap: 12px;
+      margin: 22px 0 0;
       flex-wrap: wrap;
-      margin-top: 1rem;
     }
-
-    .sidebar {
-      flex-shrink: 0;
-      width: 320px;
-      color: #00ff88;
-      font-size: 1.1rem;
-      padding: 1rem;
-      border: 2px solid #00ff88;
-      box-shadow: 0 0 8px #00ff88 inset;
-      border-radius: 6px;
-      height: 600px;
+    input {
+      width: min(520px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 16px;
+      background: white;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .13);
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .section {
+      margin-top: 34px;
+    }
+    .section h2 {
+      font-size: 26px;
+      margin: 0 0 16px;
+      padding-left: 14px;
+      border-left: 6px solid var(--primary);
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 26px rgba(31, 41, 55, .06);
+      padding: 20px;
+    }
+    .term-row {
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      gap: 10px;
       justify-content: space-between;
     }
-
-    .sidebar h2 {
-      margin-top: 0;
+    .card h3 {
+      margin: 0;
+      font-size: 20px;
+      color: #0f172a;
+    }
+    .card p {
+      margin: 10px 0 0;
+      color: #334155;
+      font-size: 15.5px;
+    }
+    .tag {
+      white-space: nowrap;
+      font-size: 12px;
+      color: var(--primary);
+      background: var(--primary-soft);
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+    .diagram {
+      margin-top: 16px;
+      padding: 10px;
+      border-radius: 16px;
+      background: #f8fbff;
+      border: 1px dashed #b9cae4;
+      overflow-x: auto;
+    }
+    .diagram-svg {
+      width: 100%;
+      min-width: 520px;
+      display: block;
+    }
+    .box { fill: #ffffff; stroke: #94a3b8; stroke-width: 2; }
+    .danger { stroke: #f87171; }
+    .op { fill: #dbeafe; stroke: #2563eb; stroke-width: 2; }
+    .line { stroke: #64748b; stroke-width: 3; fill: none; }
+    .dashline { stroke: #64748b; stroke-width: 2; stroke-dasharray: 8 8; }
+    .arrow { stroke: #2563eb; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+    .dashed { stroke-dasharray: 8 8; }
+    .fill { fill: #64748b; }
+    .pill { fill: #dbeafe; stroke: #2563eb; stroke-width: 1.5; }
+    .pill.alt { fill: #e0f2fe; stroke: #0284c7; }
+    .node { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; }
+    .svg-title { font-size: 20px; font-weight: 800; fill: #0f172a; }
+    .label { font-size: 17px; font-weight: 800; fill: #1e293b; }
+    .small { font-size: 15px; fill: #334155; }
+    .red { fill: #dc2626; font-weight: 800; }
+    .nodeText { font-size: 17px; font-weight: 800; fill: #0f172a; }
+    .empty {
+      display: none;
+      margin: 24px 0;
+      color: var(--muted);
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    footer {
+      margin-top: 46px;
+      color: var(--muted);
+      font-size: 14px;
       text-align: center;
-      font-size: 1.5rem;
-      text-decoration: underline;
     }
-
-    .sidebar ul {
-      padding-left: 1rem;
-    }
-
-    .sidebar li {
-      margin: 1.2rem 0;
-    }
-
-    .ascii-art {
-      font-size: 0.85rem;
-      white-space: pre;
-      line-height: 1.1;
-      text-align: center;
+    @media (max-width: 920px) {
+      .layout { grid-template-columns: 1fr; }
+      aside {
+        position: relative;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      nav {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
     }
   </style>
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"></polygon>
+      </marker>
+    </defs>
+  </svg>
+  <div class="layout">
+    <aside>
+      <h2>資料庫期末考</h2>
+      <p>名詞解釋＋圖解版。左側可快速跳章節，右上可搜尋名詞。</p>
+      <nav>
+        <a href="#sec-1">Ch14：正規化與 Functional Dependency</a><a href="#sec-2">Ch20：Transaction 與 ACID</a><a href="#sec-3">Ch21：Concurrency Control 與 Locking</a><a href="#sec-4">Ch22：Recovery、Log、Buffer Policy</a><a href="#sec-5">Ch18：Query Processing 與 Query Optimization</a><a href="#sec-6">Ch17：Indexing</a><a href="#sec-7">補充：容易混淆的比較</a>
+      </nav>
+    </aside>
+    <main>
+      <header class="hero">
+        <h1>資料庫名詞解釋互動網頁</h1>
+        <p>格式統一為「名詞：解釋」，並把適合畫圖的觀念整理成 SVG 圖解，方便考前快速複習。</p>
+        <div class="toolbar">
+          <input id="search" type="search" placeholder="搜尋名詞，例如：Undo、2PL、Primary Index、Closure">
+        </div>
+        <div class="hint">提示：搜尋會即時篩選卡片；沒有輸入時顯示全部。</div>
+      </header>
 
-  <div class="container">
-    <!-- 左側終端機 -->
-    <div id="terminalBox" class="terminal-box">
-      <div id="terminal" class="terminal">
-        <span id="typing-line"></span><span class="cursor">|</span>
-      </div>
-      <div class="button-group">
-        <button id="enterBtn" class="button" onclick="window.open('https://ethernaut.openzeppelin.com/level/17', '_blank');">
-          進入 Recovery 工廠
-        </button>
-        <button id="extraBtn" class="button" onclick="window.open('https://polin0710.github.io/tool.html', '_blank')">
-          :-<@#?:/^!}[
-        </button>
-        <button id="toolBtn" class="button" onclick="window.open('https://sepolia.etherscan.io/', '_blank')">
-          我想這是你需要的
-        </button>
-      </div>
-    </div>
+      <div id="empty" class="empty">找不到符合的名詞，請換一個關鍵字。</div>
 
-    <!-- 右側任務區 -->
-    <div class="sidebar">
-      <div>
-        <h2>任務目標</h2>
-        <ul>
-          <li>1️⃣ 生成 Recovery 工廠地址</li>
-          <li>2️⃣ 找出遺失的合約 Bytecode</li>
-          <li>3️⃣ 透過特殊的工具獲取暗號</li>
-        </ul>
-        <h2>小提示🤫</h2>
-        <ul>
-          <li>進入工廠請務必進行驗證身份</li>
-          <li>使用工具時請保持低調</li>
-          <li>所有資訊皆公開於鏈上</li>
-        </ul>
+      
+    <section id="sec-1" class="section">
+      <h2>Ch14：正規化與 Functional Dependency</h2>
+      <div class="cards">
+        
+        <article class="card" data-term="serializable">
+          <div class="term-row">
+            <h3>Serializable</h3>
+            <span class="tag">含圖解</span>
+          </div>
+          <p>並行執行的 schedule，如果最後結果等同於某一種「交易一個接一個連續執行」的結果，就稱為 Serializable。白話來說，雖然 transaction 看起來同時跑，但結果必須像排隊執行一樣正確。【建議畫圖：圖1 Serializable Schedule 比較圖，左邊畫 T1、T2 交錯執行，右邊畫 T1→T2 或 T2→T1 連續執行，標示兩邊結果相同】</p>
+          <div class="diagram">
+<svg viewBox="0 0 760 240" class="diagram-svg" role="img" aria-label="Serializable schedule diagram">
+  <text x="40" y="35" class="svg-title">圖1 Serializable Schedule 比較圖</text>
+  <rect x="45" y="65" width="280" height="120" rx="16" class="box"/>
+  <text x="70" y="92" class="label">Concurrency / Interleaved</text>
+  <line x1="75" y1="120" x2="295" y2="120" class="line"/>
+  <rect x="85" y="105" width="45" height="30" rx="6" class="pill"/><text x="96" y="126" class="small">T1</text>
+  <rect x="145" y="130" width="45" height="30" rx="6" class="pill alt"/><text x="156" y="151" class="small">T2</text>
+  <rect x="205" y="105" width="45" height="30" rx="6" class="pill"/><text x="216" y="126" class="small">T1</text>
+  <rect x="265" y="130" width="45" height="30" rx="6" class="pill alt"/><text x="276" y="151" class="small">T2</text>
+  <path d="M340 125 L420 125" class="arrow"/>
+  <text x="358" y="110" class="small">結果相同</text>
+  <rect x="435" y="65" width="280" height="120" rx="16" class="box"/>
+  <text x="460" y="92" class="label">Serial Execution</text>
+  <rect x="480" y="118" width="80" height="36" rx="8" class="pill"/><text x="506" y="141" class="small">T1</text>
+  <rect x="585" y="118" width="80" height="36" rx="8" class="pill alt"/><text x="611" y="141" class="small">T2</text>
+</svg>
+</div>
+        </article>
+        
+        <article class="card" data-term="spurious tuple">
+          <div class="term-row">
+            <h3>Spurious tuple</h3>
+            <span class="tag">含圖解</span>
+          </div>
+          <p>資料表分解後再 JOIN 回來時，產生原本不存在的多餘錯誤 tuple，稱為 Spurious tuple。白話來說，就是表拆壞了，JOIN 回來多出假資料。【建議畫圖：圖2 Spurious Tuple 圖，畫出兩張分解表 JOIN 後多出一列錯誤資料】</p>
+          <div class="diagram">
+<svg viewBox="0 0 760 260" class="diagram-svg" role="img" aria-label="Spurious tuple diagram">
+  <text x="40" y="35" class="svg-title">圖2 Spurious Tuple：JOIN 後多出假資料</text>
+  <rect x="45" y="65" width="180" height="120" rx="12" class="box"/>
+  <text x="75" y="92" class="label">R1(A,B)</text>
+  <text x="75" y="125" class="small">a1, b1</text><text x="75" y="153" class="small">a2, b1</text>
+  <rect x="275" y="65" width="180" height="120" rx="12" class="box"/>
+  <text x="305" y="92" class="label">R2(B,C)</text>
+  <text x="305" y="125" class="small">b1, c1</text><text x="305" y="153" class="small">b1, c2</text>
+  <path d="M235 125 L265 125" class="arrow"/>
+  <path d="M465 125 L515 125" class="arrow"/>
+  <rect x="525" y="55" width="190" height="150" rx="12" class="box danger"/>
+  <text x="560" y="82" class="label">JOIN Result</text>
+  <text x="552" y="112" class="small">a1,b1,c1</text>
+  <text x="552" y="140" class="small red">a1,b1,c2 ← 假</text>
+  <text x="552" y="168" class="small red">a2,b1,c1 ← 假</text>
+  <text x="552" y="196" class="small">a2,b1,c2</text>
+</svg>
+</div>
+        </article>
+        
+        <article class="card" data-term="closure">
+          <div class="term-row">
+            <h3>Closure</h3>
+            <span class="tag">含圖解</span>
+          </div>
+          <p>Closure 通常指 attribute set 的閉包，例如 X⁺，代表從 X 出發，根據目前所有 FD 可以推導出的全部 attributes。白話來說，就是「知道 X 後，最多還能知道哪些欄位」。【建議畫圖：圖3 Closure 推導圖，A → B、B → C，所以 A⁺ = {A, B, C}】</p>
+          <div class="diagram">
+<svg viewBox="0 0 760 220" class="diagram-svg" role="img" aria-label="Closure diagram">
+  <text x="40" y="35" class="svg-title">圖3 Closure 推導：A⁺ = {A, B, C}</text>
+  <circle cx="130" cy="120" r="38" class="node"/><text x="121" y="127" class="nodeText">A</text>
+  <circle cx="330" cy="120" r="38" class="node"/><text x="321" y="127" class="nodeText">B</text>
+  <circle cx="530" cy="120" r="38" class="node"/><text x="521" y="127" class="nodeText">C</text>
+  <path d="M170 120 L288 120" class="arrow"/>
+  <path d="M370 120 L488 120" class="arrow"/>
+  <text x="210" y="100" class="small">A → B</text>
+  <text x="410" y="100" class="small">B → C</text>
+  <text x="95" y="185" class="label">知道 A 後，可推出 B、C</text>
+</svg>
+</div>
+        </article>
+        
+        <article class="card" data-term="functional dependency">
+          <div class="term-row">
+            <h3>Functional dependency</h3>
+            
+          </div>
+          <p>Functional dependency，FD，表示如果兩筆 tuple 的 X 值相同，Y 值也必須相同，就寫成 X → Y。白話來說，X 可以決定 Y。例如「學號 → 姓名」。</p>
+          
+        </article>
+        
+        <article class="card" data-term="normalization">
+          <div class="term-row">
+            <h3>Normalization</h3>
+            
+          </div>
+          <p>Normalization 是把設計不好的 relations 拆成更小、更乾淨、更不容易出錯的 relations 的過程。白話來說，就是把一張又大又亂、資料重複很多的表拆成合理的小表。</p>
+          
+        </article>
+        
+        <article class="card" data-term="normal form">
+          <div class="term-row">
+            <h3>Normal form</h3>
+            
+          </div>
+          <p>Normal form 是用來判斷 relation 是否符合某種正規化規則的標準。白話來說，就是資料表設計的健康等級，例如 1NF、2NF、3NF、BCNF。</p>
+          
+        </article>
+        
+        <article class="card" data-term="denormalization">
+          <div class="term-row">
+            <h3>Denormalization</h3>
+            
+          </div>
+          <p>Denormalization 是把已經正規化、較好的 relations 為了查詢效率或實作方便，重新合併成較大的 relations。白話來說，就是用資料重複與維護風險，換取查詢速度。</p>
+          
+        </article>
+        
+        <article class="card" data-term="superkey">
+          <div class="term-row">
+            <h3>Superkey</h3>
+            
+          </div>
+          <p>Superkey 是一組 attributes，只要能唯一識別 relation 中每一筆 tuple，就稱為 superkey。白話來說，只要這組欄位能找到唯一一筆資料，就是 superkey。Superkey 可以包含多餘欄位。</p>
+          
+        </article>
+        
+        <article class="card" data-term="candidate key">
+          <div class="term-row">
+            <h3>Candidate key</h3>
+            
+          </div>
+          <p>Candidate key 是最小的 superkey，也就是不能再移除任何 attribute，否則就無法唯一識別 tuple。白話來說，就是剛剛好可以當資料身分證的欄位組合。</p>
+          
+        </article>
+        
+        <article class="card" data-term="primary key">
+          <div class="term-row">
+            <h3>Primary key</h3>
+            
+          </div>
+          <p>Primary key 是從 candidate keys 中選出來，作為主要識別 tuple 的 key。白話來說，候選鍵可能很多個，但正式拿來當主鍵的是 primary key。</p>
+          
+        </article>
+        
+        <article class="card" data-term="secondary key">
+          <div class="term-row">
+            <h3>Secondary key</h3>
+            
+          </div>
+          <p>Secondary key 是 candidate keys 中，扣掉 primary key 後的其他 key。白話來說，它也能唯一識別資料，但沒有被選為正式主鍵。</p>
+          
+        </article>
+        
+        <article class="card" data-term="full functional dependency">
+          <div class="term-row">
+            <h3>Full functional dependency</h3>
+            
+          </div>
+          <p>Full functional dependency 表示在 X → Y 中，如果 X 是複合屬性，Y 必須依賴整個 X，不能只依賴 X 的一部分。白話來說，Y 要靠整組 X 才能決定，少一個欄位都不行。例如 {學號, 課程編號} → 成績。</p>
+          
+        </article>
+        
+        <article class="card" data-term="prime attribute">
+          <div class="term-row">
+            <h3>Prime attribute</h3>
+            
+          </div>
+          <p>Prime attribute 是有出現在任何 candidate key 裡面的 attribute。白話來說，只要某欄位是候選鍵的一部分，它就是 prime attribute。</p>
+          
+        </article>
+        
+        <article class="card" data-term="non-prime attribute">
+          <div class="term-row">
+            <h3>Non-prime attribute</h3>
+            
+          </div>
+          <p>Non-prime attribute 是沒有出現在任何 candidate key 裡面的 attribute。白話來說，就是不是拿來識別 tuple 的普通欄位。</p>
+          
+        </article>
+        
+        <article class="card" data-term="transitive functional dependency">
+          <div class="term-row">
+            <h3>Transitive functional dependency</h3>
+            <span class="tag">含圖解</span>
+          </div>
+          <p>Transitive functional dependency 表示如果 X → Y，且 Y → Z，則 X 間接決定 Z，也就是 X → Z。白話來說，X 先決定 Y，Y 再決定 Z，所以 X 間接決定 Z。【建議畫圖：圖4 Transitive FD 圖，X → Y → Z】</p>
+          <div class="diagram">
+<svg viewBox="0 0 760 220" class="diagram-svg" role="img" aria-label="Transitive FD diagram">
+  <text x="40" y="35" class="svg-title">圖4 Transitive FD：X → Y → Z，所以 X → Z</text>
+  <circle cx="140" cy="120" r="38" class="node"/><text x="130" y="127" class="nodeText">X</text>
+  <circle cx="360" cy="120" r="38" class="node"/><text x="350" y="127" class="nodeText">Y</text>
+  <circle cx="580" cy="120" r="38" class="node"/><text x="570" y="127" class="nodeText">Z</text>
+  <path d="M180 120 L318 120" class="arrow"/>
+  <path d="M400 120 L538 120" class="arrow"/>
+  <path d="M145 165 C260 220, 470 220, 575 165" class="arrow dashed"/>
+  <text x="250" y="100" class="small">X → Y</text>
+  <text x="470" y="100" class="small">Y → Z</text>
+  <text x="335" y="202" class="small">X → Z</text>
+</svg>
+</div>
+        </article>
+        
       </div>
-      <div class="ascii-art">
-⠀⠀⠄⠀⠀⠂⠀⠀⠀⡀⠀⠀
-⠁⠀⠀⣠⣶⣿⣷⣶⣄⠀⠀⠁
-⠈⠀⢰⡿⠛⢿⡿⠻⣿⡆⠀⡀
-⠀⠠⣾⡇⠀⢸⡇⠀⢸⣧⠀⠀
-⠀⠀⣿⣷⣤⣿⣷⣤⣿⣿⠀⠀
-⠠⠀⣿⣿⣿⣿⣿⣿⣿⣿⠀⡀
-⠄⡀⠙⠟⢿⣿⡿⠿⠿⠋⠀⠀
+    </section>
+    
+    <section id="sec-2" class="section">
+      <h2>Ch20：Transaction 與 ACID</h2>
+      <div class="cards">
+        
+        <article class="card" data-term="commit_transaction">
+          <div class="term-row">
+            <h3>Commit_transaction</h3>
+            
+          </div>
+          <p>Commit_transaction 是確認一個 transaction 正確執行完成，並讓它的修改正式生效。白話來說，就是交易成功，資料正式存進資料庫。</p>
+          
+        </article>
+        
+        <article class="card" data-term="rollback">
+          <div class="term-row">
+            <h3>Rollback</h3>
+            
+          </div>
+          <p>Rollback 是當 transaction 沒有成功完成時，把整個 transaction 已經做過的修改全部取消。白話來說，就是交易失敗，全部倒回去，當作沒發生。</p>
+          
+        </article>
+        
+        <article class="card" data-term="undo">
+          <div class="term-row">
+            <h3>Undo</h3>
+            
+          </div>
+          <p>Undo 是使用 before image，把尚未成功 commit 或需要復原的 transaction 修改還原成舊值。白話來說，就是把資料改回交易之前的樣子。</p>
+          
+        </article>
+        
+        <article class="card" data-term="redo">
+          <div class="term-row">
+            <h3>Redo</h3>
+            
+          </div>
+          <p>Redo 是使用 after image，把已經 commit 但可能尚未真正寫入磁碟的修改重新做一次。白話來說，就是交易明明成功了，但系統當機可能還沒存好，所以要再寫一次。</p>
+          
+        </article>
+        
+        <article class="card" data-term="system log">
+          <div class="term-row">
+            <h3>System log</h3>
+            
+          </div>
+          <p>System log，也稱為 transaction log，是資料庫用來記錄 transaction 執行過程的紀錄，包含 begin、write、commit、abort、before image、after image 等資訊。白話來說，就是資料庫的操作紀錄本。</p>
+          
+        </article>
+        
+        <article class="card" data-term="acid">
+          <div class="term-row">
+            <h3>ACID</h3>
+            
+          </div>
+          <p>ACID 是 transaction 必須滿足的四個特性，包含 Atomicity、Consistency、Isolation、Durability。白話來說，ACID 是確保交易不會讓資料庫出問題的四大原則。</p>
+          
+        </article>
+        
+        <article class="card" data-term="atomicity">
+          <div class="term-row">
+            <h3>Atomicity</h3>
+            
+          </div>
+          <p>Atomicity，原子性，表示一個 transaction 裡的所有操作要嘛全部完成，要嘛全部不完成。白話來說，不能只做一半。例如轉帳不能只有扣錢沒有加錢。</p>
+          
+        </article>
+        
+        <article class="card" data-term="consistency">
+          <div class="term-row">
+            <h3>Consistency</h3>
+            
+          </div>
+          <p>Consistency，一致性，表示 transaction 執行前後，資料庫都必須符合所有規則與限制。白話來說，交易不能把資料庫弄壞。</p>
+          
+        </article>
+        
+        <article class="card" data-term="isolation">
+          <div class="term-row">
+            <h3>Isolation</h3>
+            
+          </div>
+          <p>Isolation，隔離性，表示多個 transactions 同時執行時，彼此不能互相干擾到造成錯誤結果。白話來說，大家可以同時操作，但結果不能亂掉。</p>
+          
+        </article>
+        
+        <article class="card" data-term="durability">
+          <div class="term-row">
+            <h3>Durability</h3>
+            
+          </div>
+          <p>Durability，持久性，表示 transaction commit 後，它的修改必須永久保存，即使系統故障也不能遺失。白話來說，只要資料庫說成功，就要真的存住。</p>
+          
+        </article>
+        
+        <article class="card" data-term="concurrency">
+          <div class="term-row">
+            <h3>Concurrency</h3>
+            
+          </div>
+          <p>Concurrency 是多個 transactions 在同一段時間內同時或交錯執行。白話來說，就是很多人同時操作資料庫。</p>
+          
+        </article>
+        
+        <article class="card" data-term="read_lock">
+          <div class="term-row">
+            <h3>Read_lock</h3>
+            
+          </div>
+          <p>Read_lock，也稱為 shared lock，是交易要讀取資料前取得的鎖。多個交易可以同時持有 read lock，但不能同時有 write lock。白話來說，大家可以一起看，但不能有人改。</p>
+          
+        </article>
+        
+        <article class="card" data-term="write_lock">
+          <div class="term-row">
+            <h3>Write_lock</h3>
+            
+          </div>
+          <p>Write_lock，也稱為 exclusive lock，是交易要修改資料前取得的鎖。同一資料項目同時間只能被一個 transaction 寫入。白話來說，我要改資料時，其他人先不能碰。</p>
+          
+        </article>
+        
       </div>
-    </div>
+    </section>
+    
+    <section id="sec-3" class="section">
+      <h2>Ch21：Concurrency Control 與 Locking</h2>
+      <div class="cards">
+        
+        <article class="card" data-term="two-phase locking(2pl)">
+          <div class="term-row">
+            <h3>Two-Phase locking(2PL)</h3>
+            <span class="tag">含圖解</span>
+          </div>
+          <p>Two-Phase locking，兩階段鎖定，是一種 concurrency control 方法，transaction 分成 locking/growing phase 與 unlocking/shrinking phase。白話來說，前半段只能拿鎖，後半段只能放鎖，不能放鎖後又拿新鎖。【建議畫圖：圖5 2PL 時間軸，前段標 Growing Phase，後段標 Shrinking Phase】</p>
+          <div class="diagram">
+<svg viewBox="0 0 760 240" class="diagram-svg" role="img" aria-label="Two phase locking diagram">
+  <text x="40" y="35" class="svg-title">圖5 2PL 時間軸：先拿鎖，再放鎖</text>
+  <line x1="80" y1="130" x2="690" y2="130" class="line"/>
+  <path d="M690 130 L670 118 L670 142 Z" class="fill"/>
+  <rect x="95" y="80" width="260" height="85" rx="14" class="box"/>
+  <text x="135" y="112" class="label">Growing Phase</text>
+  <text x="130" y="142" class="small">只能 Lock，不能 Unlock</text>
+  <rect x="405" y="80" width="260" height="85" rx="14" class="box"/>
+  <text x="435" y="112" class="label">Shrinking Phase</text>
+  <text x="435" y="142" class="small">只能 Unlock，不能 Lock</text>
+  <line x1="380" y1="65" x2="380" y2="180" class="dashline"/>
+  <text x="345" y="205" class="small">第一個 Unlock 後進入第二階段</text>
+</svg>
+</div>
+        </article>
+        
+        <article class="card" data-term="deadlock">
+          <div class="term-row">
+            <h3>Deadlock</h3>
+            <span class="tag">含圖解</span>
+          </div>
+          <p>Deadlock 是一組 process 或 transactions 互相等待對方持有的資源，導致全部卡住。白話來說，你等我、我等你，誰都動不了。【建議畫圖：圖6 Deadlock 等待圖，T1 等 T2 的鎖，T2 等 T1 的鎖】</p>
+          <div class="diagram">
+<svg viewBox="0 0 760 230" class="diagram-svg" role="img" aria-label="Deadlock diagram">
+  <text x="40" y="35" class="svg-title">圖6 Deadlock：互相等待</text>
+  <rect x="120" y="85" width="170" height="80" rx="16" class="box"/>
+  <text x="185" y="117" class="label">T1</text>
+  <text x="145" y="145" class="small">持有 Lock A</text>
+  <rect x="470" y="85" width="170" height="80" rx="16" class="box"/>
+  <text x="535" y="117" class="label">T2</text>
+  <text x="495" y="145" class="small">持有 Lock B</text>
+  <path d="M295 105 C360 60, 430 60, 465 105" class="arrow"/>
+  <text x="342" y="70" class="small">等待 B</text>
+  <path d="M465 150 C395 205, 330 205, 295 150" class="arrow"/>
+  <text x="342" y="205" class="small">等待 A</text>
+</svg>
+</div>
+        </article>
+        
+        <article class="card" data-term="starvation">
+          <div class="term-row">
+            <h3>Starvation</h3>
+            
+          </div>
+          <p>Starvation 是某些 process 或 transactions 一直無法取得需要的資源，導致長時間沒有機會執行。白話來說，就是一直被插隊，永遠輪不到它。</p>
+          
+        </article>
+        
+        <article class="card" data-term="timestamp">
+          <div class="term-row">
+            <h3>Timestamp</h3>
+            
+          </div>
+          <p>Timestamp 是資料庫中用來標記 transaction 先後順序的時間戳或排序值。白話來說，就是每個交易的號碼牌，用來決定誰比較早、誰比較晚。</p>
+          
+        </article>
+        
+        <article class="card" data-term="locking(growing) phase">
+          <div class="term-row">
+            <h3>Locking(Growing) Phase</h3>
+            
+          </div>
+          <p>Locking 或 Growing Phase 是 2PL 的第一階段，transaction 可以取得新的 locks，但不能釋放任何 lock。白話來說，這階段只能一直拿鎖，不能放鎖。</p>
+          
+        </article>
+        
+        <article class="card" data-term="unlocking(shrinking) phase">
+          <div class="term-row">
+            <h3>Unlocking(Shrinking) Phase</h3>
+            
+          </div>
+          <p>Unlocking 或 Shrinking Phase 是 2PL 的第二階段，transaction 可以釋放 locks，但不能再取得新的 lock。白話來說，這階段只能放鎖，不能再拿鎖。</p>
+          
+        </article>
+        
+        <article class="card" data-term="conservative 2pl">
+          <div class="term-row">
+            <h3>Conservative 2PL</h3>
+            
+          </div>
+          <p>Conservative 2PL 是交易開始前就先取得所有需要的 locks，如果拿不到就不開始。白話來說，先把全部資源借好再做事，因此可以避免 deadlock。</p>
+          
+        </article>
+        
+        <article class="card" data-term="basic 2pl">
+          <div class="term-row">
+            <h3>Basic 2PL</h3>
+            
+          </div>
+          <p>Basic 2PL 是交易執行過程中逐漸取得 locks，只要一開始釋放 lock，就不能再取得新 lock。白話來說，需要時才慢慢鎖，但仍遵守兩階段規則。</p>
+          
+        </article>
+        
+        <article class="card" data-term="strict 2pl">
+          <div class="term-row">
+            <h3>Strict 2PL</h3>
+            
+          </div>
+          <p>Strict 2PL 是交易執行過程中逐漸取得 locks，但 write locks 通常要等到 transaction commit 或 abort 後才釋放。白話來說，重要的寫入鎖會一路握到交易結束，避免其他交易讀到未提交資料。</p>
+          
+        </article>
+        
+        <article class="card" data-term="optimistic concurrency control">
+          <div class="term-row">
+            <h3>Optimistic Concurrency Control</h3>
+            
+          </div>
+          <p>Optimistic Concurrency Control 是一種樂觀並行控制方法，假設大部分交易不會衝突，所以交易期間不先上鎖，等交易結束前再驗證是否違反 serializability。白話來說，先讓大家做，最後檢查有沒有撞車，有問題再 rollback。</p>
+          
+        </article>
+        
+        <article class="card" data-term="concurrency control enforcement">
+          <div class="term-row">
+            <h3>Concurrency Control Enforcement</h3>
+            
+          </div>
+          <p>Concurrency Control Enforcement 是資料庫強制維持並行正確性的機制，如果交易違反 serializability 或造成衝突，可能會被 abort 或 rollback。白話來說，資料庫當裁判，發現交易會讓結果錯，就把它擋掉或退回。</p>
+          
+        </article>
+        
+      </div>
+    </section>
+    
+    <section id="sec-4" class="section">
+      <h2>Ch22：Recovery、Log、Buffer Policy</h2>
+      <div class="cards">
+        
+        <article class="card" data-term="before image(bfim)">
+          <div class="term-row">
+            <h3>Before image(BFIM)</h3>
+            
+          </div>
+          <p>Before image，BFIM，是資料更新前的舊值。白話來說，就是 undo 時要用來改回去的值。</p>
+          
+        </article>
+        
+        <article class="card" data-term="after image(afim)">
+          <div class="term-row">
+            <h3>After image(AFIM)</h3>
+            
+          </div>
+          <p>After image，AFIM，是資料更新後的新值。白話來說，就是 redo 時要用來重新寫入的值。</p>
+          
+        </article>
+        
+        <article class="card" data-term="steal">
+          <div class="term-row">
+            <h3>Steal</h3>
+            
+          </div>
+          <p>Steal 表示 cache/buffer 中尚未 commit 的 transaction 修改，可以先被 flushed 到磁碟。白話來說，交易還沒確認成功，修改就可能先偷跑進硬碟。通常需要 Undo。</p>
+          
+        </article>
+        
+        <article class="card" data-term="no-steal">
+          <div class="term-row">
+            <h3>No-Steal</h3>
+            
+          </div>
+          <p>No-Steal 表示 cache/buffer 中尚未 commit 的 transaction 修改，不可以被 flushed 到磁碟，必須等 commit 後才可以寫回。白話來說，沒成功前不准真的寫進硬碟。通常不需要 Undo。</p>
+          
+        </article>
+        
+        <article class="card" data-term="force">
+          <div class="term-row">
+            <h3>Force</h3>
+            
+          </div>
+          <p>Force 表示 transaction commit 時，相關修改必須立刻 flushed 到磁碟。白話來說，一提交就強制存檔。通常不需要 Redo。</p>
+          
+        </article>
+        
+        <article class="card" data-term="no-force">
+          <div class="term-row">
+            <h3>No-Force</h3>
+            
+          </div>
+          <p>No-Force 表示 transaction commit 時，相關修改不一定馬上 flushed 到磁碟，可以延後寫入。白話來說，先說交易成功，之後再慢慢寫進硬碟。通常需要 Redo。</p>
+          
+        </article>
+        
+        <article class="card" data-term="write-ahead logging(wal)">
+          <div class="term-row">
+            <h3>Write-Ahead Logging(WAL)</h3>
+            
+          </div>
+          <p>Write-Ahead Logging，WAL，表示資料真正寫回磁碟前，必須先把 log 寫入磁碟。白話來說，先寫操作紀錄，再改資料，這樣當機後才知道怎麼 undo 或 redo。</p>
+          
+        </article>
+        
+        <article class="card" data-term="shadowing update">
+          <div class="term-row">
+            <h3>Shadowing Update</h3>
+            
+          </div>
+          <p>Shadowing Update 是修改資料時，不直接覆蓋原本資料，而是把新版本寫到其他磁碟位置。白話來說，舊資料先留著，新資料另外放，成功後再切換指標。</p>
+          
+        </article>
+        
+        <article class="card" data-term="in-place update">
+          <div class="term-row">
+            <h3>In-place Update</h3>
+            
+          </div>
+          <p>In-place Update 是直接用 cache 中的新版本覆蓋磁碟上的原資料。白話來說，就是在原本位置直接改掉資料。</p>
+          
+        </article>
+        
+        <article class="card" data-term="immediate update">
+          <div class="term-row">
+            <h3>Immediate Update</h3>
+            
+          </div>
+          <p>Immediate Update 是資料在 cache 中一修改，磁碟上的資料也可能立即或很快被修改，即使 transaction 還沒 commit。白話來說，還沒完全確定成功，就可能先寫進硬碟。通常需要 Undo，也可能需要 Redo。</p>
+          
+        </article>
+        
+        <article class="card" data-term="deferred update">
+          <div class="term-row">
+            <h3>Deferred Update</h3>
+            
+          </div>
+          <p>Deferred Update 是 cache 中的資料修改，等 transaction 結束或一定數量交易完成後，才寫入磁碟。白話來說，先記錄修改，確定成功後再真的寫入。通常不需要 Undo，但可能需要 Redo。</p>
+          
+        </article>
+        
+      </div>
+    </section>
+    
+    <section id="sec-5" class="section">
+      <h2>Ch18：Query Processing 與 Query Optimization</h2>
+      <div class="cards">
+        
+        <article class="card" data-term="query block">
+          <div class="term-row">
+            <h3>Query block</h3>
+            
+          </div>
+          <p>Query block 是查詢最佳化的基本單位，通常是一個 SELECT-FROM-WHERE 區塊，也可能包含 GROUP BY 與 HAVING。白話來說，就是一個可以被轉成 relational algebra 的最小查詢區塊。</p>
+          
+        </article>
+        
+        <article class="card" data-term="nested queries">
+          <div class="term-row">
+            <h3>Nested queries</h3>
+            
+          </div>
+          <p>Nested queries 是在一個 query 裡面又包含另一個 query block。白話來說，就是查詢裡面包查詢，內層查詢結果會被外層查詢使用。</p>
+          
+        </article>
+        
+        <article class="card" data-term="conjunctive selection">
+          <div class="term-row">
+            <h3>Conjunctive selection</h3>
+            
+          </div>
+          <p>Conjunctive selection 是使用多個 AND 條件進行 selection。白話來說，就是同時符合多個條件才會被選出來。例如 salary &gt; 30000 AND sex = &#x27;F&#x27;。</p>
+          
+        </article>
+        
+        <article class="card" data-term="query graph">
+          <div class="term-row">
+            <h3>Query graph</h3>
+            <span class="tag">含圖解</span>
+          </div>
+          <p>Query graph 是用圖狀結構表示 query 或 relational algebra expression，通常節點代表 relation，邊代表 join 條件，旁邊標 selection 條件。白話來說，就是把 SQL 查詢畫成資料表關係圖。【建議畫圖：圖7 Query Graph，Employee、Department、Project 畫成節點，Join 條件畫成邊】</p>
+          <div class="diagram">
+<svg viewBox="0 0 760 260" class="diagram-svg" role="img" aria-label="Query graph diagram">
+  <text x="40" y="35" class="svg-title">圖7 Query Graph：表是節點，JOIN 條件是邊</text>
+  <circle cx="170" cy="130" r="55" class="node"/><text x="123" y="135" class="nodeText">EMPLOYEE</text>
+  <circle cx="390" cy="130" r="55" class="node"/><text x="350" y="135" class="nodeText">WORKS_ON</text>
+  <circle cx="610" cy="130" r="55" class="node"/><text x="575" y="135" class="nodeText">PROJECT</text>
+  <line x1="225" y1="130" x2="335" y2="130" class="line"/>
+  <line x1="445" y1="130" x2="555" y2="130" class="line"/>
+  <text x="240" y="110" class="small">E.Ssn = W.Essn</text>
+  <text x="460" y="110" class="small">W.Pno = P.Pnumber</text>
+  <text x="100" y="210" class="small">Selection: E.Sex='F'</text>
+  <text x="520" y="210" class="small">Selection: W.Hours&lt;40</text>
+</svg>
+</div>
+        </article>
+        
+        <article class="card" data-term="query tree">
+          <div class="term-row">
+            <h3>Query tree</h3>
+            <span class="tag">含圖解</span>
+          </div>
+          <p>Query tree 是用樹狀結構表示 query 或 relational algebra expression，葉節點通常是 relation，中間節點是 select、project、join 等操作。白話來說，就是把 SQL 拆成一層一層的執行流程。【建議畫圖：圖8 Query Tree，底部放資料表，上面接 σ、⋈、π】</p>
+          <div class="diagram">
+<svg viewBox="0 0 760 340" class="diagram-svg" role="img" aria-label="Query tree diagram">
+  <text x="40" y="35" class="svg-title">圖8 Query Tree：SQL 的執行操作樹</text>
+  <rect x="285" y="60" width="190" height="48" rx="12" class="op"/><text x="335" y="90" class="label">π 欄位投影</text>
+  <rect x="285" y="135" width="190" height="48" rx="12" class="op"/><text x="340" y="165" class="label">⋈ JOIN</text>
+  <rect x="120" y="220" width="170" height="48" rx="12" class="box"/><text x="145" y="250" class="small">σ 條件 EMPLOYEE</text>
+  <rect x="355" y="220" width="170" height="48" rx="12" class="box"/><text x="388" y="250" class="small">WORKS_ON</text>
+  <rect x="570" y="220" width="140" height="48" rx="12" class="box"/><text x="602" y="250" class="small">PROJECT</text>
+  <line x1="380" y1="108" x2="380" y2="135" class="line"/>
+  <line x1="380" y1="183" x2="205" y2="220" class="line"/>
+  <line x1="380" y1="183" x2="440" y2="220" class="line"/>
+  <line x1="475" y1="159" x2="640" y2="220" class="line"/>
+</svg>
+</div>
+        </article>
+        
+        <article class="card" data-term="heuristics optimization">
+          <div class="term-row">
+            <h3>Heuristics Optimization</h3>
+            
+          </div>
+          <p>Heuristics Optimization 是用經驗規則改善查詢效率的最佳化方法。白話來說，不精算所有成本，而是用常識讓查詢變快，例如 selection 盡量先做、projection 盡量先做、先做能減少資料量的 join。</p>
+          
+        </article>
+        
+      </div>
+    </section>
+    
+    <section id="sec-6" class="section">
+      <h2>Ch17：Indexing</h2>
+      <div class="cards">
+        
+        <article class="card" data-term="dense index">
+          <div class="term-row">
+            <h3>Dense index</h3>
+            
+          </div>
+          <p>Dense index 是 data file 中每一個 search key value，通常每筆資料或每個不同值，都有對應的 index entry。白話來說，幾乎每筆資料都有目錄項目。</p>
+          
+        </article>
+        
+        <article class="card" data-term="sparse index">
+          <div class="term-row">
+            <h3>Sparse index</h3>
+            
+          </div>
+          <p>Sparse index，也稱 nondense index，是只有部分 search key value 有 index entry。白話來說，不是每筆資料都建立目錄，只記一些代表位置。</p>
+          
+        </article>
+        
+        <article class="card" data-term="primary index">
+          <div class="term-row">
+            <h3>Primary Index</h3>
+            <span class="tag">含圖解</span>
+          </div>
+          <p>Primary Index 是建立在已排序 data file 的 ordering key field 上的 index，通常每個 block 有一個 index entry，指向該 block 的第一筆資料，也就是 block anchor。白話來說，資料本身已照主鍵排序，索引只記每個區塊的代表資料。【建議畫圖：圖9 Primary Index，一邊畫索引 key，另一邊箭頭指向排序資料檔 block】</p>
+          <div class="diagram">
+<svg viewBox="0 0 760 290" class="diagram-svg" role="img" aria-label="Primary index diagram">
+  <text x="40" y="35" class="svg-title">圖9 Primary Index：索引指向排序資料檔每個 block 的 anchor</text>
+  <rect x="80" y="70" width="170" height="170" rx="12" class="box"/>
+  <text x="118" y="100" class="label">Primary Index</text>
+  <text x="115" y="135" class="small">K1 →</text><text x="115" y="170" class="small">K4 →</text><text x="115" y="205" class="small">K7 →</text>
+  <rect x="390" y="65" width="250" height="55" rx="10" class="box"/><text x="420" y="100" class="small">Block 1: K1, K2, K3</text>
+  <rect x="390" y="135" width="250" height="55" rx="10" class="box"/><text x="420" y="170" class="small">Block 2: K4, K5, K6</text>
+  <rect x="390" y="205" width="250" height="55" rx="10" class="box"/><text x="420" y="240" class="small">Block 3: K7, K8, K9</text>
+  <path d="M170 130 L385 92" class="arrow"/><path d="M170 165 L385 162" class="arrow"/><path d="M170 200 L385 232" class="arrow"/>
+</svg>
+</div>
+        </article>
+        
+        <article class="card" data-term="clustering index">
+          <div class="term-row">
+            <h3>Clustering Index</h3>
+            <span class="tag">含圖解</span>
+          </div>
+          <p>Clustering Index 是建立在已排序 data file 的 non-key field 上的 index，每個 distinct field value 有一個 index entry，指向該值第一個出現的 data block。白話來說，資料照某個會重複的欄位分群，例如部門編號，索引指到每群的開頭。【建議畫圖：圖10 Clustering Index，不同部門編號指向各群資料開頭】</p>
+          <div class="diagram">
+<svg viewBox="0 0 760 290" class="diagram-svg" role="img" aria-label="Clustering index diagram">
+  <text x="40" y="35" class="svg-title">圖10 Clustering Index：依非 key 欄位分群</text>
+  <rect x="80" y="70" width="190" height="170" rx="12" class="box"/>
+  <text x="110" y="100" class="label">Clustering Index</text>
+  <text x="115" y="135" class="small">Dept 1 →</text><text x="115" y="170" class="small">Dept 2 →</text><text x="115" y="205" class="small">Dept 3 →</text>
+  <rect x="410" y="65" width="250" height="55" rx="10" class="box"/><text x="435" y="100" class="small">Dept 1, Dept 1, Dept 1</text>
+  <rect x="410" y="135" width="250" height="55" rx="10" class="box"/><text x="435" y="170" class="small">Dept 2, Dept 2</text>
+  <rect x="410" y="205" width="250" height="55" rx="10" class="box"/><text x="435" y="240" class="small">Dept 3, Dept 3</text>
+  <path d="M190 130 L405 92" class="arrow"/><path d="M190 165 L405 162" class="arrow"/><path d="M190 200 L405 232" class="arrow"/>
+</svg>
+</div>
+        </article>
+        
+        <article class="card" data-term="secondary index">
+          <div class="term-row">
+            <h3>Secondary Index</h3>
+            <span class="tag">含圖解</span>
+          </div>
+          <p>Secondary Index 是在已有主要存取方式的 data file 上，額外建立的輔助 index。它可以建立在 key 或 non-key field 上，通常 index 本身排序，但 data file 不一定依該欄位排序。白話來說，就是除了原本找資料的方法外，再開一條查詢捷徑。【建議畫圖：圖11 Secondary Index，左邊排序索引，右邊箭頭指向未排序資料檔】</p>
+          <div class="diagram">
+<svg viewBox="0 0 760 300" class="diagram-svg" role="img" aria-label="Secondary index diagram">
+  <text x="40" y="35" class="svg-title">圖11 Secondary Index：排序索引指向未排序資料檔</text>
+  <rect x="75" y="70" width="190" height="190" rx="12" class="box"/>
+  <text x="112" y="100" class="label">Secondary Index</text>
+  <text x="115" y="135" class="small">A →</text><text x="115" y="170" class="small">B →</text><text x="115" y="205" class="small">C →</text><text x="115" y="240" class="small">D →</text>
+  <rect x="420" y="70" width="250" height="190" rx="12" class="box"/>
+  <text x="475" y="100" class="label">Data File 未照 A/B/C 排</text>
+  <text x="455" y="135" class="small">Record: C</text>
+  <text x="455" y="170" class="small">Record: A</text>
+  <text x="455" y="205" class="small">Record: D</text>
+  <text x="455" y="240" class="small">Record: B</text>
+  <path d="M155 130 L450 165" class="arrow"/><path d="M155 165 L450 235" class="arrow"/><path d="M155 200 L450 130" class="arrow"/><path d="M155 235 L450 200" class="arrow"/>
+</svg>
+</div>
+        </article>
+        
+      </div>
+    </section>
+    
+    <section id="sec-7" class="section">
+      <h2>補充：容易混淆的比較</h2>
+      <div class="cards">
+        
+        <article class="card" data-term="undo vs redo">
+          <div class="term-row">
+            <h3>Undo vs Redo</h3>
+            
+          </div>
+          <p>Undo 是把未完成或失敗交易改回 before image；Redo 是把已 commit 的交易重新套用 after image。白話來說，Undo 是倒回去，Redo 是再做一次。</p>
+          
+        </article>
+        
+        <article class="card" data-term="steal vs no-steal">
+          <div class="term-row">
+            <h3>Steal vs No-Steal</h3>
+            
+          </div>
+          <p>Steal 允許未 commit 修改先寫到磁碟，所以需要 Undo；No-Steal 不允許未 commit 修改先寫到磁碟，所以通常不需要 Undo。</p>
+          
+        </article>
+        
+        <article class="card" data-term="force vs no-force">
+          <div class="term-row">
+            <h3>Force vs No-Force</h3>
+            
+          </div>
+          <p>Force 要求 commit 時立刻寫到磁碟，所以通常不需要 Redo；No-Force 允許 commit 後晚點寫到磁碟，所以通常需要 Redo。</p>
+          
+        </article>
+        
+        <article class="card" data-term="primary index vs clustering index vs secondary index">
+          <div class="term-row">
+            <h3>Primary Index vs Clustering Index vs Secondary Index</h3>
+            
+          </div>
+          <p>Primary Index 建在排序資料檔的 key 欄位上；Clustering Index 建在排序資料檔的 non-key 欄位上；Secondary Index 是額外輔助索引，資料檔不一定照該欄位排序。</p>
+          
+        </article>
+        
+        <article class="card" data-term="2pl vs strict 2pl">
+          <div class="term-row">
+            <h3>2PL vs Strict 2PL</h3>
+            
+          </div>
+          <p>2PL 只要求先拿鎖再放鎖；Strict 2PL 進一步要求重要鎖通常要到 commit 或 abort 才釋放，因此更能避免讀到未提交資料。</p>
+          
+        </article>
+        
+        <article class="card" data-term="candidate key vs superkey">
+          <div class="term-row">
+            <h3>Candidate Key vs Superkey</h3>
+            
+          </div>
+          <p>Superkey 可以唯一識別資料，但可能有多餘欄位；Candidate Key 是最小的 Superkey，不能再少欄位。</p>
+          
+        </article>
+        
+        <article class="card" data-term="prime attribute vs non-prime attribute">
+          <div class="term-row">
+            <h3>Prime Attribute vs Non-prime Attribute</h3>
+            
+          </div>
+          <p>Prime Attribute 有出現在某個 candidate key 裡；Non-prime Attribute 沒有出現在任何 candidate key 裡。</p>
+          
+        </article>
+        
+      </div>
+    </section>
+    
+
+      <footer>Generated for database final review｜建議直接用瀏覽器開啟或投影複習</footer>
+    </main>
   </div>
 
   <script>
-    const lines = [
-      ">>> 接收到匿名訊息...",
-      ">>> 『在鏈上，有個傳說中的「幽靈錢包」，裡頭藏著一筆上古遺產。』",
-      ">>> 『那筆資產藏在某個無人知曉的幽靈地址中，",
-      "      並透過一個叫作 Recovery 的工廠合約部署出去。』",
-      "\n>>> 你是一名區塊鏈分析師兼白帽駭客。",
-      ">>> 你需要透過網站找出生成的工廠地址",
-      ">>> 並透過該地址完成追蹤，找出最後遺產的所在地址",
-      "",
-      ">>> 利用合約代碼獲取關鍵片段...",
-      "",
-      "\n\n     就讓我看看你的實力吧                                ---獵鑰人"
-    ];
+    const search = document.getElementById('search');
+    const cards = [...document.querySelectorAll('.card')];
+    const sections = [...document.querySelectorAll('.section')];
+    const empty = document.getElementById('empty');
 
-    const terminalBox = document.getElementById('terminalBox');
-    const terminal = document.getElementById('terminal');
-    const typingLine = document.getElementById('typing-line');
-    const enterBtn = document.getElementById('enterBtn');
-    const extraBtn = document.getElementById('extraBtn');
-    const toolBtn = document.getElementById('toolBtn');
-    let lineIndex = 0;
-    let charIndex = 0;
+    function filterCards() {
+      const q = search.value.trim().toLowerCase();
+      let visibleCount = 0;
 
-    function typeNextChar() {
-      if (lineIndex < lines.length) {
-        const line = lines[lineIndex];
-        if (charIndex < line.length) {
-          typingLine.textContent += line.charAt(charIndex);
-          charIndex++;
-          setTimeout(typeNextChar, 30);
-        } else {
-          const br = document.createElement('div');
-          br.textContent = typingLine.textContent;
-          terminal.insertBefore(br, typingLine);
-          typingLine.textContent = '';
-          charIndex = 0;
-          lineIndex++;
-          setTimeout(typeNextChar, 300);
-        }
-      } else {
-        document.querySelector('.cursor').remove();
-        enterBtn.style.display = 'inline-block';
-        extraBtn.style.display = 'inline-block';
-        toolBtn.style.display = 'inline-block';
-        terminalBox.classList.add('expanded');
-      }
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        const show = !q || text.includes(q);
+        card.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+      });
+
+      sections.forEach(sec => {
+        const any = [...sec.querySelectorAll('.card')].some(card => card.style.display !== 'none');
+        sec.style.display = any ? '' : 'none';
+      });
+
+      empty.style.display = visibleCount === 0 ? 'block' : 'none';
     }
 
-    typeNextChar();
+    search.addEventListener('input', filterCards);
   </script>
 </body>
 </html>
